@@ -6,7 +6,7 @@ from pump import Pump
 
 class IceMakerStatus:
     ERROR = 0
-    INIT = 1
+    COOLING_DOWN = 1
     READY = 2
     WORK = 3
 

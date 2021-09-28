@@ -1,7 +1,7 @@
 import os
-
 import config_manager
 
+# todo logrotate
 
 class LogLevel:
     ERROR = 1
@@ -12,9 +12,9 @@ class LogLevel:
 class Logger:
     @classmethod
     def _write_log(cls, msg: str, log_level: LogLevel):
-        errorlog_path = config_manager.ConfigParser.get_config_for('error_log')
+        errorlog_path = config_manager.ConfigParser.get_config_for('logfile')
         if not errorlog_path:
-            errorlog_path = 'errorlog_path.csv'
+            errorlog_path = 'log.csv'
         with open(errorlog_path, 'a') as errorlog:
             errorlog.write(msg + ', ' + log_level + ';')
 
