@@ -6,11 +6,12 @@ import utime
 
 class TemperatureSensor:
     def __init__(self, pin: Pin):
+        self._status = -1
         self._pin = pin
         self._onewire = OneWire(self._pin)
         self._ds = ds18x20.DS18x20(self._onewire)
         self._roms = self._ds.scan()
-        self._timeout = 750  # todo params
+        self._timeout = 750  # todo read from params
         self._next_time = utime.ticks_ms() + self._timeout
 
     @property
