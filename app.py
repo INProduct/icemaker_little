@@ -4,15 +4,16 @@ from time import time
 from logger import Logger
 from valve import Valve
 from pump import Pump
-from temperature_sensor import TemperatureSensor
+from temperature_sensor import TemperatureSensor, TemperatureKind
 
 
 class IceMakerStatus:
     ERROR = 0
     INIT = 1
     COOLING_DOWN = 2
-    MAKE_ICE = 3
-    PUSH_OUT = 4
+    READY_COOLING = 3
+    MAKE_ICE = 4
+    PUSH_OUT = 5
 
 
 class IceMaker:
@@ -30,18 +31,24 @@ class IceMaker:
         # PUMPS
         self._water_pump = Pump(Pin(10), True)  # todo Pinbelegung
         self._compressor = Pump(Pin(10), True)  # todo Pinbelegung
-        # TEMPERATURES
-        self._temperature_cooling = TemperatureSensor(Pin(10))  # todo Pinbelegung
-        self._temperature_indoor = TemperatureSensor(Pin(10))  # todo Pinbelegung
-        self._temperature_heater = TemperatureSensor(Pin(10))  # todo Pinbelegung
+        # TEMPERATURSENSORS
+        self._temperature_cooling = TemperatureSensor(Pin(10), TemperatureKind.COLD, -5, 2)  # todo Pinbelegung  # todo read from config
+        self._temperature_indoor = TemperatureSensor(Pin(10), TemperatureKind.COLD, -2, 1)  # todo Pinbelegung  # todo read from config
+        self._temperature_heater = TemperatureSensor(Pin(10), TemperatureKind.HEAT, 70, 2)  # todo Pinbelegung  # todo read from config
         self.temperatures = []
         self.temperatures.append(self._temperature_cooling)
         self.temperatures.append(self._temperature_indoor)
         self.temperatures.append(self._temperature_heater)
+        self.switch_status(IceMakerStatus.COOLING_DOWN)
+        self.main_loop()
+
 
     def switch_status(self, status: IceMakerStatus):
         Logger.write_info('switch to ' + str(status) + 'status')
+        if status == IceMakerStatus.READY_COOLING and not self._status == IceMakerStatus.READY_COOLING:
+            self._work_timer.init(mode=Timer.ONE_SHOT, period=500, callback=self._push_out_handler)
         self._status = status
+
 
     def set_error(self):
         Logger.write_error('Error')  # todo what kind of error
@@ -77,6 +84,18 @@ class IceMaker:
     def main_loop(self):
         while self._status > IceMakerStatus.ERROR:
             for temp in self.temperatures:
-                res = temp.update()
+                temp.update()
+            # TEMPERATURE LOGIC
+            if self._temperature_heater.status:
+                self._cooling_water_valve.switch_on()
+            else:
+                self._cooling_water_valve.switch_off()
+            if self._temperature_indoor.status:
+                self._compressor.switch_on()
+            else:
+                self._compressor.switch_off()
+                if self._status == IceMakerStatus.COOLING_DOWN:
+                    self.switch_status(IceMakerStatus.READY_COOLING)
+
 
 
