@@ -1,5 +1,6 @@
 from machine import Pin, RTC, Timer
 from time import time
+from config_manager import ConfigParser
 
 from logger import Logger
 from valve import Valve
@@ -22,19 +23,19 @@ class IceMaker:
         self.switch_status(IceMakerStatus.INIT)
         # TIMER AND TIMES
         self._work_timer = Timer(1)
-        self._make_ice_period = 11 * 60 * 1000  # todo read from config
-        self._push_out_period = 1 * 60 * 1000  # todo read from config
+        self._make_ice_period = ConfigParser.get_config_for('times')['make_ice_period']
+        self._push_out_period = ConfigParser.get_config_for('times')['push_out_period']
         # VALVES
-        self._water_inlet_valve = Valve(Pin(10), True)  # todo Pinbelegung
-        self._cooling_water_valve = Valve(Pin(10), True)  # todo Pinbelegung
-        self._cooling_valve = Valve(Pin(10), True)  # todo Pinbelegung
+        self._water_inlet_valve = Valve(Pin(12, Pin.OUT), True)
+        self._cooling_water_valve = Valve(Pin(14, Pin.OUT), True)
+        self._cooling_valve = Valve(Pin(27, Pin.OUT), True)
         # PUMPS
-        self._water_pump = Pump(Pin(10), True)  # todo Pinbelegung
-        self._compressor = Pump(Pin(10), True)  # todo Pinbelegung
+        self._water_pump = Pump(Pin(26, Pin.OUT), True)
+        self._compressor = Pump(Pin(25, Pin.OUT), True)
         # TEMPERATURSENSORS
-        self._temperature_cooling = TemperatureSensor(Pin(10), TemperatureKind.COLD, -5, 2)  # todo Pinbelegung  # todo read from config
-        self._temperature_indoor = TemperatureSensor(Pin(10), TemperatureKind.COLD, -2, 1)  # todo Pinbelegung  # todo read from config
-        self._temperature_heater = TemperatureSensor(Pin(10), TemperatureKind.HEAT, 70, 2)  # todo Pinbelegung  # todo read from config
+        self._temperature_cooling = TemperatureSensor(Pin(2), TemperatureKind.HEAT, 25, 2)  # todo Pinbelegung  # todo read from config
+        self._temperature_indoor = TemperatureSensor(Pin(15), TemperatureKind.HEAT, 25, 1)  # todo Pinbelegung  # todo read from config
+        self._temperature_heater = TemperatureSensor(Pin(13), TemperatureKind.HEAT, 30, 2)  # todo Pinbelegung  # todo read from config
         self.temperatures = []
         self.temperatures.append(self._temperature_cooling)
         self.temperatures.append(self._temperature_indoor)
@@ -70,15 +71,13 @@ class IceMaker:
         self.switch_status(IceMakerStatus.MAKE_ICE)
         self._water_inlet_valve.switch_off()
         self._water_pump.switch_on()
-        self._cooling_valve.switch_on()  # if switching on the valve make cold
-        self._work_timer.init(mode=Timer.ONE_SHOT, period=1000, callback=self._push_out_handler)
+        self._work_timer.init(mode=Timer.ONE_SHOT, period=self._make_ice_period, callback=self._push_out_handler)
 
     def _push_out_handler(self, t):
         self.switch_status(IceMakerStatus.PUSH_OUT)
-        self._cooling_valve.switch_off()  # if switching off the valve make warm
         self._water_pump.switch_off()
         self._water_inlet_valve.switch_on()
-        self._work_timer.init(mode=Timer.ONE_SHOT, period=1000, callback=self._make_ice_handler)
+        self._work_timer.init(mode=Timer.ONE_SHOT, period=self._push_out_period, callback=self._make_ice_handler)
 
     def main_loop(self):
         while self._status > IceMakerStatus.ERROR:
@@ -92,8 +91,10 @@ class IceMaker:
                 self._cooling_water_valve.switch_off()
             if self._temperature_indoor.status:
                 self._compressor.switch_on()
+                self._cooling_valve.switch_on()
             else:
                 self._compressor.switch_off()
+                self._cooling_valve.switch_off()
                 if self._status == IceMakerStatus.COOLING_DOWN:
                     self.switch_status(IceMakerStatus.READY_COOLING)
 

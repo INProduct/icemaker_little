@@ -1,11 +1,14 @@
 from machine import Pin
 
+from logger import Logger
+
 
 class Pump:
     def __init__(self, pin: Pin, low_level: bool):
         self._out = pin
         self._low_level = low_level
         self.switch_off()
+        Logger.write_info('Pump was init')
 
     def switch_off(self):
         self._out.value(self._low_level)

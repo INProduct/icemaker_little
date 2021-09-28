@@ -1,11 +1,10 @@
 import network
 from logger import LogLevel, Logger
-import config_manager
+from config_manager import ConfigParser
 
+ConfigParser.read_config()
 
-Logger.init(LogLevel.INFO)  # todo read from config
-
-config_manager.ConfigParser.read_config()
+Logger.init(ConfigParser.get_config_for('debug_level'))  # todo read from config
 
 wlan_st = network.WLAN(network.STA_IF)
 wlan_st.active(False)
