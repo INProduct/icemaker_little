@@ -3,7 +3,7 @@ from logger import LogLevel, Logger
 import config_manager
 
 
-Logger.init(LogLevel.ERROR)
+Logger.init(LogLevel.INFO)  # todo read from config
 
 config_manager.ConfigParser.read_config()
 
