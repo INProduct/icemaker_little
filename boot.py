@@ -1,6 +1,9 @@
 import network
-
+from logger import LogLevel, Logger
 import config_manager
+
+
+Logger.init(LogLevel.ERROR)
 
 config_manager.ConfigParser.read_config()
 
