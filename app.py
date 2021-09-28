@@ -40,21 +40,20 @@ class IceMaker:
         self.temperatures.append(self._temperature_indoor)
         self.temperatures.append(self._temperature_heater)
         self.switch_status(IceMakerStatus.COOLING_DOWN)
-        self.main_loop()
 
 
     def switch_status(self, status: IceMakerStatus):
-        Logger.write_info('switch to ' + str(status) + 'status')
+        Logger.write_info('switch to ' + str(status) + ' status')
         if status == IceMakerStatus.READY_COOLING and not self._status == IceMakerStatus.READY_COOLING:
             self._work_timer.init(mode=Timer.ONE_SHOT, period=500, callback=self._push_out_handler)
         self._status = status
 
 
     def set_error(self):
-        Logger.write_error('Error')  # todo what kind of error
-        self.switch_status(IceMakerStatus.ERROR)
         self._work_timer.deinit()
         self._switch_all_off()
+        Logger.write_error('Error')  # todo what kind of error
+        self.switch_status(IceMakerStatus.ERROR)
 
     def _switch_all_off(self):
         self._compressor.switch_off()
@@ -84,7 +83,8 @@ class IceMaker:
     def main_loop(self):
         while self._status > IceMakerStatus.ERROR:
             for temp in self.temperatures:
-                temp.update()
+                if temp.update() == -1:
+                    self.set_error()
             # TEMPERATURE LOGIC
             if self._temperature_heater.status:
                 self._cooling_water_valve.switch_on()

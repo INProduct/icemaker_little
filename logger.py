@@ -24,15 +24,18 @@ class Logger:
 
     @classmethod
     def write_error(cls, msg: str):
+        print('Error: ', msg)
         if cls.debug_level > 0:
             cls._write_log(msg, LogLevel.ERROR)
 
     @classmethod
     def write_warning(cls, msg: str):
+        print('Warning: ', msg)
         if cls.debug_level > 1:
             cls._write_log(msg, LogLevel.WARNING)
 
     @classmethod
     def write_info(cls, msg: str):
+        print('Info: ', msg)
         if cls.debug_level > 2:
             cls._write_log(msg, LogLevel.INFO)
