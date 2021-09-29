@@ -33,7 +33,8 @@ class ConfigParser:
 
     @classmethod
     def write_config(cls):
-        pass  # todo write config
+        with open('config.json', 'w') as configfile:
+            configfile.write(json.dumps(cls.config))
 
     @classmethod
     def _write_default_config(cls):
