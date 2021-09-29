@@ -1,5 +1,4 @@
 from machine import Pin
-
 from logger import Logger
 
 

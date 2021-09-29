@@ -3,6 +3,7 @@ from onewire import OneWire, OneWireError
 import ds18x20
 import utime
 
+from config_manager import ConfigParser
 from logger import Logger
 
 
@@ -10,8 +11,10 @@ class TemperatureKind:
     HEAT = 1
     COLD = 2
 
+
 class TemperatureSensor:
-    def __init__(self, pin: Pin, kind: TemperatureKind, switchpoint: int, hysterese: int):
+    def __init__(self, name: str, pin: Pin, kind: TemperatureKind, switchpoint: int, hysterese: int):
+        self._name = name
         self._status = True
         self._pin = pin
         self._kind = kind
@@ -21,10 +24,14 @@ class TemperatureSensor:
         self._onewire = OneWire(self._pin)
         self._ds = ds18x20.DS18X20(self._onewire)
         self._roms = self._ds.scan()
-        self._timeout = 750  # todo read from params
+        self._timeout = ConfigParser.get_config_for('times')['tempsens_timeout_reads']
         self._next_time = utime.ticks_ms() + self._timeout
         Logger.write_info('Init Temperaturesensor '
                           + str(self._kind) + ' ' + str(self._switchpoint) + ' ' + str(self._hysterese))
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def temperature(self):
@@ -43,8 +50,8 @@ class TemperatureSensor:
         if self._next_time < utime.ticks_ms():
             try:
                 self._get_temperature()
-            except OneWireError as e:
-                Logger.write_error('Temperature sensor is broken' + str(e))
+            except OneWireError:
+                Logger.write_error('Sensor ' + self.name + ' don\'t response')
                 return -1
 
             if self._kind == TemperatureKind.HEAT and self.temperature < self._switchpoint - self._hysterese:
@@ -55,4 +62,3 @@ class TemperatureSensor:
                 self._status = False
 
         return self._status
-

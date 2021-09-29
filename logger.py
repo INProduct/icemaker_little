@@ -2,6 +2,7 @@ import config_manager
 
 # todo logrotate
 
+
 class LogLevel:
     NONE = 0
     ERROR = 1

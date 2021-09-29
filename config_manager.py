@@ -27,11 +27,13 @@ class ConfigParser:
 
     @classmethod
     def get_config_for(cls, key):
-        return cls.config.get(key) if cls.config else None
+        val = cls.config.get(key) if cls.config else None
+        if not val:
+            logger.Logger.write_error('No value for ' + str(key) + ' found')
 
     @classmethod
     def write_config(cls):
-        pass  # todo write config  # todo depricated
+        pass  # todo write config
 
     @classmethod
     def _write_default_config(cls):
@@ -41,7 +43,15 @@ class ConfigParser:
             'times': {
                 'make_ice_period': 600000,
                 'push_out_period': 50000,
+                'tempsens_timeout_reads': 750,
             },
+            'temperatures':{
+                'indoor': -2,
+                'indoor_hysterese': 2,
+                'cooling_zone': -5,
+                'cooling_zone_hysterese': 2,
+            },
+
         }
         with open('config.json', 'w') as configfile:
             configfile.write(json.dumps(jsonfile))

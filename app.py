@@ -1,5 +1,4 @@
-from machine import Pin, RTC, Timer
-from time import time
+from machine import Pin, Timer
 from config_manager import ConfigParser
 
 from logger import Logger
@@ -33,15 +32,16 @@ class IceMaker:
         self._water_pump = Pump(Pin(26, Pin.OUT), True)
         self._compressor = Pump(Pin(25, Pin.OUT), True)
         # TEMPERATURSENSORS
-        self._temperature_cooling = TemperatureSensor(Pin(2), TemperatureKind.HEAT, 25, 2)  # todo Pinbelegung  # todo read from config
-        self._temperature_indoor = TemperatureSensor(Pin(15), TemperatureKind.HEAT, 25, 1)  # todo Pinbelegung  # todo read from config
-        self._temperature_heater = TemperatureSensor(Pin(13), TemperatureKind.HEAT, 30, 2)  # todo Pinbelegung  # todo read from config
+        self._temperature_indoor = TemperatureSensor('Indoor', Pin(2), TemperatureKind.HEAT,
+                                                      ConfigParser.get_config_for('temperatures')['indoor'],
+                                                      ConfigParser.get_config_for('temperatures')['indoor_hysterese'])
+        self._temperature_cooling = TemperatureSensor('Cooling Zone', Pin(15), TemperatureKind.HEAT,
+                                                      ConfigParser.get_config_for('temperatures')['cooling_zone'],
+                                                      ConfigParser.get_config_for('temperatures')['cooling_zone_hysterese'])
         self.temperatures = []
         self.temperatures.append(self._temperature_cooling)
         self.temperatures.append(self._temperature_indoor)
-        self.temperatures.append(self._temperature_heater)
         self.switch_status(IceMakerStatus.COOLING_DOWN)
-
 
     def switch_status(self, status: IceMakerStatus):
         Logger.write_info('switch to ' + str(status) + ' status')
@@ -49,11 +49,10 @@ class IceMaker:
             self._work_timer.init(mode=Timer.ONE_SHOT, period=500, callback=self._push_out_handler)
         self._status = status
 
-
-    def set_error(self):
+    def set_error(self, msg: str):
         self._work_timer.deinit()
         self._switch_all_off()
-        Logger.write_error('Error')  # todo what kind of error
+        Logger.write_error('Error ' + msg)
         self.switch_status(IceMakerStatus.ERROR)
 
     def _switch_all_off(self):
@@ -83,12 +82,8 @@ class IceMaker:
         while self._status > IceMakerStatus.ERROR:
             for temp in self.temperatures:
                 if temp.update() == -1:
-                    self.set_error()
+                    self.set_error(temp.name)
             # TEMPERATURE LOGIC
-            if self._temperature_heater.status:
-                self._cooling_water_valve.switch_on()
-            else:
-                self._cooling_water_valve.switch_off()
             if self._temperature_indoor.status:
                 self._compressor.switch_on()
                 self._cooling_valve.switch_on()
@@ -97,6 +92,3 @@ class IceMaker:
                 self._cooling_valve.switch_off()
                 if self._status == IceMakerStatus.COOLING_DOWN:
                     self.switch_status(IceMakerStatus.READY_COOLING)
-
-
-

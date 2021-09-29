@@ -1,6 +1,7 @@
 from machine import Pin
 from logger import Logger
 
+
 class Valve:
     def __init__(self, pin: Pin, low_level: bool):
         self._out = pin
