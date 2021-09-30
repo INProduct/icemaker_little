@@ -1,23 +1,15 @@
 from machine import Pin, Timer
 from config_manager import ConfigParser
-
+from signallampe import Signallampe
 from logger import Logger
 from valve import Valve
 from pump import Pump
 from temperature_sensor import TemperatureSensor, TemperatureKind
-
-
-class IceMakerStatus:
-    ERROR = 0
-    INIT = 1
-    COOLING_DOWN = 2
-    READY_COOLING = 3
-    MAKE_ICE = 4
-    PUSH_OUT = 5
-
+from icemaker_status import IceMakerStatus, IceMakerError
 
 class IceMaker:
     def __init__(self):
+        self._signallampe = Signallampe(Pin(0, Pin.OUT))
         self._status = IceMakerStatus.ERROR
         self.switch_status(IceMakerStatus.INIT)
         # TIMER AND TIMES
@@ -30,8 +22,10 @@ class IceMaker:
         self._cooling_valve = Valve(Pin(27, Pin.OUT), True)
         # PUMPS
         self._water_pump = Pump(Pin(26, Pin.OUT), True)
-        self._compressor = Pump(Pin(25, Pin.OUT), True)
+        self._compressor = Pump(Pin(25, Pin.OUT), True, self._signallampe.set_compressor_light)
         # TEMPERATURSENSORS
+
+        # todo dont forget make sensor Cold after tests
         self._temperature_indoor = TemperatureSensor('Indoor', Pin(2), TemperatureKind.HEAT,
                                                       ConfigParser.get_config_for('temperatures')['indoor'],
                                                       ConfigParser.get_config_for('temperatures')['indoor_hysterese'])
@@ -54,6 +48,7 @@ class IceMaker:
         self._switch_all_off()
         Logger.write_error('Error ' + msg)
         self.switch_status(IceMakerStatus.ERROR)
+        self._signallampe.set_error(IceMakerError.UNRECOGNIZED)  # todo test all modes
 
     def _switch_all_off(self):
         self._compressor.switch_off()
@@ -80,6 +75,7 @@ class IceMaker:
 
     def main_loop(self):
         while self._status > IceMakerStatus.ERROR:
+            self._signallampe.update(self._status)
             for temp in self.temperatures:
                 if temp.update() == -1:
                     self.set_error(temp.name)

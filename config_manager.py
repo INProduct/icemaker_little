@@ -30,6 +30,7 @@ class ConfigParser:
         val = cls.config.get(key) if cls.config else None
         if not val:
             logger.Logger.write_error('No value for ' + str(key) + ' found')
+        return val
 
     @classmethod
     def write_config(cls):
@@ -46,12 +47,30 @@ class ConfigParser:
                 'push_out_period': 50000,
                 'tempsens_timeout_reads': 750,
             },
-            'temperatures':{
+            'temperatures': {
                 'indoor': -2,
                 'indoor_hysterese': 2,
                 'cooling_zone': -5,
                 'cooling_zone_hysterese': 2,
             },
+            'signal': {
+                'length': 1,
+                'status': {
+                    0: [0, 0, 0],
+                    1: [255, 0, 0],
+                    2: [125, 125, 0],
+                    3: [0, 0, 255],
+                    4: [0, 125, 255],
+                    5: [100, 0, 255],
+                    6: [125, 125, 0],
+                },
+                'error': {
+                    0: 500,
+                    1: 1000,
+                    2: 2000,
+                }
+
+            }
 
         }
         with open('config.json', 'w') as configfile:

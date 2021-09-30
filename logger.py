@@ -1,7 +1,7 @@
 import config_manager
 
 # todo logrotate
-
+# todo delete log function
 
 class LogLevel:
     NONE = 0
@@ -17,9 +17,7 @@ class Logger:
 
     @classmethod
     def _write_log(cls, msg: str, log_level: LogLevel):
-        log_path = config_manager.ConfigParser.get_config_for('logfile')
-        if log_path is None:
-            log_path = 'log.csv'
+        log_path = 'log.csv'
         with open(log_path, 'a') as log:
             log.write(msg + ', ' + str(log_level) + ';\n')
 
