@@ -20,17 +20,16 @@ class IceMaker:
         # VALVES
         self._water_inlet_valve = Valve(Pin(14, Pin.OUT), False)
         self._cooling_water_valve = Valve(Pin(27, Pin.OUT), False)
-        self._cooling_valve = Valve(Pin(26, Pin.OUT), False)
         # PUMPS
-        self._water_pump = Pump(Pin(25, Pin.OUT), False)
-        self._compressor = Pump(Pin(33, Pin.OUT), False, self._signallampe.set_compressor_light)
+        self._water_pump = Pump(Pin(26, Pin.OUT), False)
+        self._compressor = Pump(Pin(25, Pin.OUT), False)
 
         # TEMPERATURSENSORS
         # todo dont forget make sensor Cold after tests
-        self._temperature_indoor = TemperatureSensor('Indoor', Pin(15), TemperatureKind.HEAT,
+        self._temperature_indoor = TemperatureSensor('Indoor', Pin(15), TemperatureKind.COLD,
                                                       ConfigParser.get_config_for('temperatures')['indoor'],
                                                       ConfigParser.get_config_for('temperatures')['indoor_hysterese'])
-        self._temperature_cooling = TemperatureSensor('Cooling Zone', Pin(2), TemperatureKind.HEAT,
+        self._temperature_cooling = TemperatureSensor('Cooling Zone', Pin(2), TemperatureKind.COLD,
                                                       ConfigParser.get_config_for('temperatures')['cooling_zone'],
                                                       ConfigParser.get_config_for('temperatures')['cooling_zone_hysterese'])
         self._temperature_stb = TemperatureSensor('STB', Pin(4), TemperatureKind.COLD,
@@ -63,7 +62,6 @@ class IceMaker:
         self._compressor.switch_off()
         self._water_pump.switch_off()
         self._water_inlet_valve.switch_off()
-        self._cooling_valve.switch_off()
         self._cooling_water_valve.switch_off()
         Logger.write_error('All switched off')
 
@@ -74,14 +72,13 @@ class IceMaker:
         self.switch_status(IceMakerStatus.MAKE_ICE)
         self._water_inlet_valve.switch_off()
         self._water_pump.switch_on()
-        self._cooling_valve.switch_off()
         self._work_timer.init(mode=Timer.ONE_SHOT, period=self._make_ice_period, callback=self._push_out_handler)
 
     def _push_out_handler(self, t):
         self.switch_status(IceMakerStatus.PUSH_OUT)
+        self._compressor.switch_off()
         self._water_pump.switch_off()
         self._water_inlet_valve.switch_on()
-        self._cooling_valve.switch_on()
         self._work_timer.init(mode=Timer.ONE_SHOT, period=self._push_out_period, callback=self._make_ice_handler)
 
     def _read_temperatures(self):
@@ -100,7 +97,7 @@ class IceMaker:
                 self._compressor.switch_off()
                 self.switch_status(IceMakerStatus.READY_COOLING)
 
-            if self._temperature_cooling.status:
+            if self._status == IceMakerStatus.MAKE_ICE and self._temperature_cooling.status:
                 self._compressor.switch_on()
             else:
                 self._compressor.switch_off()

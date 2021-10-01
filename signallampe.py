@@ -13,13 +13,10 @@ class Signallampe:
         self._np.write()
         self._work_timer = Timer(3)
         self._last_status = IceMakerStatus.OFF
-        self._compressor_status = False
 
     def _set_color(self, status):
         for l in range(self._length):
             r, g, b = tuple(ConfigParser.get_config_for('signal')['status'][str(status)])
-            if self._compressor_status:
-                r, g = 255, 255
             self._np[l] = (r, g, b)
             self._np.write()
 
@@ -33,10 +30,6 @@ class Signallampe:
             self._set_color(1)
         else:
             self._set_color(0)
-
-    def set_compressor_light(self, compressor_status: bool):
-        self._compressor_status = compressor_status
-        self._set_color(self._last_status)
 
     def update(self, status: IceMakerStatus):
         if status is not self._last_status:
