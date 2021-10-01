@@ -18,12 +18,12 @@ class IceMaker:
         self._make_ice_period = ConfigParser.get_config_for('times')['make_ice_period']
         self._push_out_period = ConfigParser.get_config_for('times')['push_out_period']
         # VALVES
-        self._water_inlet_valve = Valve(Pin(14, Pin.OUT), True)
-        self._cooling_water_valve = Valve(Pin(27, Pin.OUT), True)
-        self._cooling_valve = Valve(Pin(26, Pin.OUT), True)
+        self._water_inlet_valve = Valve(Pin(14, Pin.OUT), False)
+        self._cooling_water_valve = Valve(Pin(27, Pin.OUT), False)
+        self._cooling_valve = Valve(Pin(26, Pin.OUT), False)
         # PUMPS
-        self._water_pump = Pump(Pin(25, Pin.OUT), True)
-        self._compressor = Pump(Pin(33, Pin.OUT), True, self._signallampe.set_compressor_light)
+        self._water_pump = Pump(Pin(25, Pin.OUT), False)
+        self._compressor = Pump(Pin(33, Pin.OUT), False, self._signallampe.set_compressor_light)
 
         # TEMPERATURSENSORS
         # todo dont forget make sensor Cold after tests
