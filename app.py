@@ -58,6 +58,9 @@ class IceMaker:
         self._switch_all_off()
         Logger.write_error('Error ' + msg)
         self._signallampe.set_error(error)
+        if error == IceMakerError.STB:
+            Logger.write_error('Switch cooling on')  # todo switch off after 5 min
+            self._work_timer.init(mode=Timer.ONE_SHOT, period=5000, callback=self._cooling_down_handler)
 
     def _switch_all_off(self):
         self._compressor.switch_off()
@@ -67,8 +70,9 @@ class IceMaker:
         self._cooling_water_valve.switch_off()
         Logger.write_error('All switched off')
 
-    def _cooling_down_handler(self):
-        self._compressor.switch_on()
+    def _cooling_down_handler(self, t):
+        self._cooling_water_valve.switch_on()
+        self._work_timer.init(mode=Timer.ONE_SHOT, period=5 * 60 * 1000, callback=lambda x: self._cooling_water_valve.switch_off())
 
     def _make_ice_handler(self, t):
         self.switch_status(IceMakerStatus.MAKE_ICE)
