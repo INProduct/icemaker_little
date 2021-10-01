@@ -17,6 +17,7 @@ class Pump:
     def switch_on(self):
         self._out.value(not self._low_level)
         self._trigger_callback()
+        print('switched on')
 
 
     def toggle(self):

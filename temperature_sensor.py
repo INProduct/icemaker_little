@@ -15,7 +15,7 @@ class TemperatureKind:
 class TemperatureSensor:
     def __init__(self, name: str, pin: Pin, kind: TemperatureKind, switchpoint: int, hysterese: int):
         self._name = name
-        self._status = True
+        self._status = False
         self._pin = pin
         self._kind = kind
         self._temp = 0

@@ -52,6 +52,8 @@ class ConfigParser:
                 'indoor_hysterese': 2,
                 'cooling_zone': -5,
                 'cooling_zone_hysterese': 2,
+                'stb': 70,
+                'stb_hysterese': 2,
             },
             'signal': {
                 'length': 1,
@@ -68,6 +70,7 @@ class ConfigParser:
                     0: 500,
                     1: 1000,
                     2: 2000,
+                    3: 3000,
                 }
 
             }

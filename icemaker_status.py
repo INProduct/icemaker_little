@@ -12,3 +12,4 @@ class IceMakerError:
     UNRECOGNIZED = 0
     TEMP_SENS = 1
     OVERTIME = 2
+    STB = 3
