@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div class="container">
+
+</div>
+
+<script src="jquery.min.js" type="text/javascript"></script>
+<script>
+    window.setInterval(kb_source_2_target, 1000);
+	function kb_source_2_target() {
+		$.get('ajax_weight.pyhtml', function(data) {
+			$('#target').html(data);
+		})
+	}
+	function send_start_request(){
+	    $.get("ajax_start.pyhtml");
+	}
+	function send_stop_request(){
+	    $.get("ajax_stop.pyhtml");
+	}
+	function send_start_one_portion_request(){
+	    $.get("ajax_start_one_portion.pyhtml");
+	}
+	function send_portion_weight(){
+	    alert($('#portion-weight').val())
+	    $.get("ajax_portion_weight.pyhtml/?portion="+$('#portion-weight').val());
+	}
+</script>
+</body>
+</html>

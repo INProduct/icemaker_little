@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <div>
+        <div class="caption">Aktueller Status: <span id="mode"></span> <span id="status"></span></div>
+        <div class="description" id="description">Maybe Error</div>
+    </div>
+    <div class="item-container">
+        <div>Innen: <span id="temperature-indoor">10</span>°C</div>
+        <div>Kühlzone: <span id="temperature-cooling">10</span>°C</div>
+        <div>STB: <span id="temperature-stb">10</span>°C</div>
+    </div>
+    <div class="item-container">
+        <button class="btn grey" id="but-automatic" onclick="send_set_mode(3)">Automatic</button>
+        <button class="btn grey" id="but-hand" onclick="send_set_mode(2)">Hand</button>
+        <button class="btn grey" id="but-clean" onclick="send_set_mode(1)">Reinigung</button>
+    </div>
+    <div class="item-container" id="automatic-button-container">
+        <button class="btn primary" id="but-automatic-start" onclick="send_automatic_start()">Start</button>
+        <button class="btn secondary" id="but-automatic-stop" onclick="send_automatic_stop()">Stopp</button>
+    </div>
+    <div class="item-container" id="hand-button-container">
+        <button class="btn primary" id="but-water" onclick="send_toggle_water()">Start Wasser</button>
+        <button class="btn primary" id="but-compressor" onclick="send_toggle_compressor()">Start Kompressor</button>
+        <button class="btn primary" id="but-pump" onclick="send_toggle_pump()">Start Pumpe</button>
+    </div>
+    <div class="item-container" id="clean-button-container">
+        <button class="btn primary" id="but-clean-start" onclick="send_clean_start()">Start</button>
+        <button class="btn secondary" id="but-clean-stop" onclick="send_clean_stop()">Stopp</button>
+    </div>
+</div>
+
+<script src="jquery.min.js" type="text/javascript"></script>
+<script src="index_script.js" type="text/javascript"></script>
+</body>
+</html>

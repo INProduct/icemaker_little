@@ -41,7 +41,14 @@ class ConfigParser:
     def _write_default_config(cls):
         jsonfile = {
             'debug_level': 3,
-            'network': {'enabled': False},
+            'network': {
+                "ip": "192.168.5.1",
+                "port": 80,
+                "ssid": "INProduct",
+                "password": "INProduct2013",
+                "auth-mode": 3,
+                "hidden": 0
+            },
             'times': {
                 'make_ice_period': 600000,
                 'push_out_period': 50000,

@@ -43,7 +43,10 @@ class TemperatureSensor:
 
     def _get_temperature(self):
         self._ds.convert_temp()
-        self._temp = self._ds.read_temp(self._roms[0])
+        try:
+            self._temp = self._ds.read_temp(self._roms[0])
+        except:
+            print('error temperature' + self._name)
         self._next_time = utime.ticks_ms() + self._timeout
 
     def update(self):
@@ -53,12 +56,14 @@ class TemperatureSensor:
             except OneWireError:
                 Logger.write_error('Sensor ' + self.name + ' don\'t response')
                 return -1
-
+            print('Temperature ' + self.name + ' : ' + str(self.temperature))
             if self._kind == TemperatureKind.HEAT and self.temperature < self._switchpoint - self._hysterese:
                 self._status = True
-            elif self._kind == TemperatureKind.COLD and self.temperature > self._switchpoint + self._hysterese:
+            elif self._kind == TemperatureKind.HEAT and self.temperature > self._switchpoint + self._hysterese:
+                self._status = False
+            if self._kind == TemperatureKind.COLD and self.temperature > self._switchpoint + self._hysterese:
                 self._status = True
-            else:
+            elif self._kind == TemperatureKind.COLD and self.temperature < self._switchpoint - self._hysterese:
                 self._status = False
 
         return self._status

@@ -1,0 +1,57 @@
+body {
+    background: lightblue;
+}
+.caption{
+    font-size: 20px;
+    color: green;
+    text-align: center;
+}
+
+.btn{
+    border: none;
+    border-bottom-color: currentcolor;
+    border-bottom-style: none;
+    border-bottom-width: medium;
+    padding: 10px;
+    min-width: 100px;
+    color: white;
+    margin: 2px;
+    font-size: 1.3em;
+    border-radius: 0.05em;
+    border-bottom: 0.12em solid black;
+    min-height: 50px;
+}
+.btn:active{
+    border-top: 0.12em solid black;
+    border-bottom: none;
+}
+
+.primary{
+    background: greenyellow;
+}
+
+.secondary{
+    background: violet;
+}
+
+.accept{
+    background: dodgerblue;
+}
+
+.grey{
+    background: grey;
+}
+
+.active{
+    border-bottom: 0.15em solid red;
+    min-height: 50px;
+    min-width: 180px;
+}
+
+
+.item-container{
+    margin-top: 2.5em;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+}
